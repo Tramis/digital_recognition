@@ -1,6 +1,10 @@
-# digital_recognition
+# digital recognition
 
 softmax-regression
+
+## page
+
+[click](https://tramis.github.io/digital_recognition/)
 
 ## training dataset
 
