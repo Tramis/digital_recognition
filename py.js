@@ -1,6 +1,7 @@
 
 
 arg = "123"
+arg28 = ""
 
 const script = `
 from PIL import Image
@@ -7865,7 +7866,6 @@ b = [
     -0.009359643794596195,
 ]
 
-
 def imgstr2num(imgstr):
     imgstr = re.search(r"base64,(.*)", imgstr).group(1)
     im = Image.open(BytesIO(base64.b64decode(imgstr)))
@@ -7894,4 +7894,37 @@ def imgstr2num(imgstr):
 
 import js
 imgstr2num(js.arg)
+`
+
+const script_crop = `
+import js
+from PIL import Image
+import PIL.ImageOps
+
+import io
+import re
+import base64
+from io import BytesIO
+
+imgstr = js.arg
+imgstr = re.search(r"base64,(.*)", imgstr).group(1)
+im = Image.open(BytesIO(base64.b64decode(imgstr)))
+
+margin = 100
+bbox = im.getbbox()
+bbox = [bbox[0] - margin, bbox[1] - margin, bbox[2] + margin, bbox[3] + margin]
+im = im.crop(bbox)
+im = im.resize((28, 28), Image.Resampling.BICUBIC)
+
+img_data = list(im.getdata())
+img_data = list(map(lambda x: (0, 0, 0, 255 - x[3]), img_data))
+
+import  numpy as np
+im = Image.fromarray(np.asarray(img_data, dtype=np.uint8).reshape(28, 28, 4))
+
+output = io.BytesIO()
+im.save(output, format="png")
+
+res = base64.b64encode(output.getvalue()).decode("utf-8")
+res
 `

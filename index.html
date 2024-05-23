@@ -5,10 +5,19 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
     <script src="./py.js"></script>
     <script>
+        let s = `\
+    waiting for loading
+    'r' to reset
+    'c' to confirm
+    's' to show cropped image on top left of the canvas (28 x 28)
+        `
+        console.log(s)
+
         pyodide = null
 
         async function main() {
             pyodide = await loadPyodide();
+            await pyodide.loadPackage("numpy")
             await pyodide.loadPackage("pillow")
             // Pyodide is now ready to use...
             console.log(pyodide.runPython(`
@@ -59,9 +68,21 @@
                 arg = canvas.toDataURL("image/png").toString()
                 run_py()
             } else if (event.keyCode == 68) {
-                var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+                var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")  // here is the most important part because if you dont replace you will get a DOM 18 exception.
 
-                window.location.href = image; // it will save locally
+                window.location.href = image  // it will save locally
+            } else if (event.keyCode == 83){
+                arg = canvas.toDataURL("image/png").toString()
+                
+                let res = pyodide.runPython(script_crop)
+                res = `data:image/png;base64,` + res
+
+                var tmp_img = new Image()
+                tmp_img.onload = () => {
+                    ctx.drawImage(tmp_img, 0, 0)
+                }
+                tmp_img.src = res
+                
             }
         });
 
